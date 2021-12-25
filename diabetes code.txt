@@ -1,0 +1,98 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import confusion_matrix
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
+df=pd.read_csv('diabetes.csv')
+print("Shape",df.shape)
+df.head()
+df.describe()
+df['Outcome'].value_counts()
+df.groupby('Outcome').mean()
+#seperating the data and labels
+X = df.drop(columns ='Outcome',axis=1)
+Y= df['Outcome']
+print(X)
+print(Y)
+df.info()
+df.corr()
+fig = plt.figure(figsize = (19,15))
+plt.matshow(df.corr()**2,fignum = fig.number)
+plt.xticks(range(df.shape[1]),df.columns,fontsize = 14, rotation = 45)
+plt.yticks(range(df.shape[1]),df.columns,fontsize = 14)
+cb = plt.colorbar()
+cb.ax.tick_params(labelsize = 14)
+plt.title("correlation matrix of squared correlations \n\n\n\n\n",fontsize =20)
+print(df["Outcome"].value_counts())
+fig = plt.figure(figsize = (10, 6))
+fig = plt.figure(figsize =(16,6))
+
+sns.distplot(df["Glucose"][df["Outcome"] == 1])
+plt.xticks([i for i in range(0,201,15)],rotation = 45)
+plt.ylabel("Glucose count")
+plt.title("Glucose",fontsize = 20)
+fig = plt.figure(figsize = (16,6))
+
+sns.distplot(df["Insulin"][df["Outcome"]==1])
+plt.xticks()
+plt.title("Insulin",fontsize = 20)
+fig = plt.figure(figsize =(16,6))
+
+sns.distplot(df["BMI"][df["Outcome"]==1])
+plt.xticks()
+plt.title("BMI",fontsize = 20)
+fig = plt.figure(figsize = (16,5))
+sns.distplot(df["DiabetesPedigreeFunction"][df["Outcome"] == 1])
+plt.xticks([i*0.15 for i in range(1,12)])
+plt.title("diabetespedigreefunction")fig = plt.figure(figsize = (16,6))
+
+sns.distplot(df["Age"][df["Outcome"] == 1])
+plt.xticks([i*0.15 for i in range(1,12)])
+plt.title("Age")
+X = df.drop(["Pregnancies","BloodPressure","SkinThickness"],axis = 1)
+y = df.iloc[:,-1]
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size = 0.2,random_state=0)
+
+print("X_train size:", X_train.shape)
+print("y_train size: ",y_train.shape,"\n")
+print("X_test size:", X_test.shape)
+print("y_test size:",y_test.shape)
+sc= StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.fit_transform(X_test)
+print(sc)
+print(X_train)
+print(X_test)
+kn_classifier = KNeighborsClassifier(n_neighbors =5,metric = 'minkowski',p = 2)
+kn_classifier.fit(X_train,y_train)
+kn_y_pred = kn_classifier.predict(X_test)
+cm_kn = confusion_matrix(y_test, kn_y_pred)
+print(cm_kn)
+print("Correct:",sum(kn_y_pred == y_test))
+print("Incorrect : ",sum(kn_y_pred != y_test))
+print("Accuracy:",sum(kn_y_pred ==y_test)/len(kn_y_pred))
+svc_classifier = SVC(kernel ="linear",random_state = 0)
+svc_classifier.fit(X_train,y_train)
+svc_y_pred = svc_classifier.predict(X_test)
+svc_cm = confusion_matrix(y_test,svc_y_pred)
+print(svc_cm)
+print("Correct:",sum(svc_y_pred == y_test))
+print("Incorrect : ",sum(svc_y_pred != y_test))
+print("Accuracy:",sum(svc_y_pred ==y_test)/len(kn_y_pred))
+nb_classifier = GaussianNB()
+nb_classifier.fit(X_train,y_train)
+nb_y_pred =nb_classifier.predict(X_test)
+nb_cm = confusion_matrix(nb_y_pred,y_test)
+print(nb_cm)
+print("Correct:",sum(nb_y_pred == y_test))
+print("Incorrect : ",sum(nb_y_pred != y_test))
+print("Accuracy:",sum(nb_y_pred ==y_test)/len(nb_y_pred))
